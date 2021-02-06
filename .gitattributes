@@ -1,1 +1,4 @@
 * text=auto
+
+# Convert CRLF => LF
+*.sh text
