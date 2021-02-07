@@ -26,4 +26,4 @@ classes/
 !/.idea/copyright/profiles_settings.xml
 
 # Protect the accounts
-./client_launcher/environment/accounts.txt
+client_launcher/environment/accounts.txt
