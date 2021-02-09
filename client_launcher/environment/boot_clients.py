@@ -7,7 +7,8 @@ from enum import Enum
 import os
 import signal
 
-mc_install_location = 'C:/"Program Files (x86)"/Minecraft/MinecraftLauncher.exe'
+mc_install_location = 'C:\\Program Files (x86)\\Minecraft\\MinecraftLauncher.exe'
+gameWindows = {}
 
 class Coord(Enum):
   MOJANG_LOGIN = [1035, 562]
@@ -23,10 +24,20 @@ class Coord(Enum):
   SECONDARY_PLAY_BUTTON = [1140, 633]
   ACCOUNT_MENU_DROP_DOWN = [140, 46]
   LOGOUT_MENU_ITEM = [96, 160]
+  MAIN_PLAY_BUTTON = [1131, 752]
+
 
 if sys.platform == 'win32':
   loop = asyncio.ProactorEventLoop()
   asyncio.set_event_loop(loop)
+
+def wait_for_gui_load():
+  while (not gui.pixelMatchesColor(*(Coord.MOJANG_LOGIN.value), (255, 255, 255)) and
+        not gui.pixelMatchesColor(*(Coord.MAIN_PLAY_BUTTON.value), (0, 138, 68)) and
+        not gui.pixelMatchesColor(*(Coord.CREDENTIALS_LOGIN.value), (0, 140, 68))): 
+        time.sleep(0.1)
+        continue
+  print('Something worked')
 
 async def wait_for_launcher_load(username, password, launcher_process):
   while True:
@@ -47,36 +58,50 @@ async def wait_for_launcher_load(username, password, launcher_process):
   play_game(launcher_process)
 
 async def boot_launcher(username, password):
-  cmd = f'{mc_install_location}'
-  proc = await asyncio.create_subprocess_shell(
-    cmd,
-    stdout=asyncio.subprocess.PIPE,
-    stderr=asyncio.subprocess.PIPE)
+  print(mc_install_location)
+  proc = subprocess.Popen(['MinecraftLauncher.exe'],
+    executable=mc_install_location,
+    stdout=subprocess.PIPE,
+    stderr=subprocess.PIPE, shell=False)
+
+  for line in proc.stdout.readlines():
+    print(line)
+
+  for line in proc.stderr.readlines():
+    print(line)
 
   await wait_for_launcher_load(username, password, proc)
 
-  await proc.wait() # wait for process to complete
+  proc.wait() # wait for process to complete
 
-  print(f'[{cmd!r} exited with {proc.returncode}]')
+ #TODO: VERIFY THIS CODE
+  if username not in gameWindows:
+    mc_game_window = gw.getActiveWindow()
+    if mc_game_window.title().includes('Minecraft'):
+      gameWindows[username] = mc_game_window
+
+  time.sleep(2)
+  print(f'[{mc_install_location!r} exited with {proc.returncode}]')
 
 
 
 def mojang_sign_in(username, password):
-    # if on original sign in page, click sign in and enter credentials
-    # print('MOJANG LOGIN COLOR:' + gui.pixel(*(Coord.MOJANG_LOGIN.value)))
-    # print('CREDENTIALS LOGIN COLOR:' + gui.pixel(*(Coord.CREDENTIALS_LOGIN.value)))
-    print('at sign in cases')
-    print('COORDINATE VALUES' + str(Coord.MOJANG_LOGIN.value) + '\nCOLOR: ' + str(gui.pixel(*(Coord.MOJANG_LOGIN.value))))
-    if gui.pixelMatchesColor(*(Coord.MOJANG_LOGIN.value), (255, 255, 255)):
-      move_and_click(*(Coord.MOJANG_LOGIN_BUTTON.value)) # click mojang login
-      enter_credentials(username, password)
-    elif gui.pixelMatchesColor(*(Coord.CREDENTIALS_LOGIN.value), (0, 140, 68)):
-      enter_credentials(username, password)
-    else:
-      print("signing out because we're already signed in")
-      time.sleep(4)
-      sign_out()
-    
+  wait_for_gui_load()
+  # if on original sign in page, click sign in and enter credentials
+  # print('MOJANG LOGIN COLOR:' + gui.pixel(*(Coord.MOJANG_LOGIN.value)))
+  # print('CREDENTIALS LOGIN COLOR:' + gui.pixel(*(Coord.CREDENTIALS_LOGIN.value)))
+  print('at sign in cases')
+  print('COORDINATE VALUES' + str(Coord.MOJANG_LOGIN.value) + '\nCOLOR: ' + str(gui.pixel(*(Coord.MOJANG_LOGIN.value))))
+  if gui.pixelMatchesColor(*(Coord.MOJANG_LOGIN.value), (255, 255, 255)):
+    move_and_click(*(Coord.MOJANG_LOGIN_BUTTON.value)) # click mojang login
+    enter_credentials(username, password)
+  elif gui.pixelMatchesColor(*(Coord.CREDENTIALS_LOGIN.value), (0, 140, 68)):
+    enter_credentials(username, password)
+  else:
+    print("signing out because we're already signed in")
+    time.sleep(4)
+    sign_out()
+  
     
 
 # def clear_login():
@@ -122,16 +147,7 @@ def play_game(launcher_process):
   # if multiple client dialogue, click play anyways
   # if gui.pixelMatchesColor(1140, 633, (231, 100, 60)):
   move_and_click(*(Coord.SECONDARY_PLAY_BUTTON.value))
-  
-  os.kill(launcher_process.pid, signal.CTRL_C_EVENT)
-    
-    
-def wait_for_game_load():
-    while True:
-        if "Minecraft Launcher" not in gw.getAllTitles():
-          print('Rebooting Minecraft Launcher...')
-          break
-        time.sleep(0.5)
+  launcher_process.terminate()
 
 def move_and_click(x, y, c=1):
   gui.moveTo(x, y)
@@ -140,7 +156,7 @@ def move_and_click(x, y, c=1):
 def sign_out():
   move_and_click(*(Coord.ACCOUNT_MENU_DROP_DOWN.value))
   move_and_click(*(Coord.LOGOUT_MENU_ITEM.value))
-  time.sleep(3)
+  time.sleep(5)
 
 
 file = open('accounts.txt', 'r')
@@ -153,12 +169,11 @@ while True:
   loginDictionary[username] = password
 # mojang_sign_in('conceicaoinacio2011@hotmail.com', 'c02051988') # we need to read from file, but make sure we are not signing in the same account twice
 # print(loginDictionary.items())
+async def create_clients_per_user():
+  for username in loginDictionary:
+    await boot_launcher(username, loginDictionary[username])
 
-
-for username in loginDictionary:
-  loop.run_until_complete(boot_launcher(username, loginDictionary[username]))
-  break
-
+loop.run_until_complete(create_clients_per_user())
 loop.close()
 # next(iter(my_dict))
 
