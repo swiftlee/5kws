@@ -6,7 +6,9 @@ import asyncio, sys
 from coord import Coord
 from login_helper import set_logged_in, wait_for_gui_load, wait_for_launcher_load, get_logged_in as logged_in, mojang_sign_in
 from gui_navigation_helper import move_and_click
+import server_connect
 
+gui.FAILSAFE = False
 mc_install_location = 'C:\\Program Files (x86)\\Minecraft\\MinecraftLauncher.exe'
 game_windows = {}
 login_dictionary = {}
@@ -117,7 +119,7 @@ async def create_clients_per_user():
 
   i = 0
   for username in login_dictionary:
-    if username not in game_windows and username not in failed_signin and i < 2:
+    if username not in game_windows and username not in failed_signin and i < 1:
       await boot_launcher(username, login_dictionary[username])
       i+=1
 
@@ -135,18 +137,10 @@ if sys.platform == 'win32':
 set_logged_in(False)
 loop.run_until_complete(create_clients_per_user())
 loop.close()
-
+time.sleep(5)
+print('Giving time for game to load...')
 minimize_windows()
 
-for window in list(game_windows.values()):
-  print('Maximizing window and focusing window...')
-  window.maximize()
-  time.sleep(2)
-  gui.click(window.center)
-  if not window.isActive:
-    print('Window was not focused properly')
-    break
-  print('Window is active!')
-  #do what we need to in that client
-  window.minimize()
+server_connect.join_server(game_windows)
+
   

@@ -4,6 +4,8 @@ import pyautogui as gui
 from gui_navigation_helper import move_and_click, enter_credentials, sign_out
 import time
 
+gui.FAILSAFE = False
+
 def set_logged_in(value):
   global logged_in
   logged_in = value
