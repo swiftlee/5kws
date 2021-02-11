@@ -29,3 +29,11 @@ classes/
 client_launcher/environment/accounts.txt
 client_launcher/environment/Lib/*
 client_launcher/environment/__pycache__
+
+.mixin.out/
+.project
+.settings/
+.vscode/
+*.log
+*.log.gz
+chardetect.exe

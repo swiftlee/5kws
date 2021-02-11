@@ -30,6 +30,7 @@ public final class DefaultCommands {
     public static List<ICommand> createAll(IBaritone baritone) {
         Objects.requireNonNull(baritone);
         List<ICommand> commands = new ArrayList<>(Arrays.asList(
+                new DoubleMesh(baritone),
                 new HelpCommand(baritone),
                 new SetCommand(baritone),
                 new CommandAlias(baritone, Arrays.asList("modified", "mod", "baritone", "modifiedsettings"), "List modified settings", "set modified"),

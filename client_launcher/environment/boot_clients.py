@@ -119,7 +119,7 @@ async def create_clients_per_user():
 
   i = 0
   for username in login_dictionary:
-    if username not in game_windows and username not in failed_signin and i < 1:
+    if username not in game_windows and username not in failed_signin and i < 3:
       await boot_launcher(username, login_dictionary[username])
       i+=1
 

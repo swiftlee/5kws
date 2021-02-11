@@ -42,6 +42,7 @@ def enter_hypixel(window):
   connection_success = False
   navigate_main_menu(window)
   while not connection_success:
+    print('Connecting to server...')
     connect_to_server(window) 
     connection_success = check_connection(window)
     time.sleep(1)
@@ -56,7 +57,7 @@ def navigate_main_menu(window):
     time.sleep(0.5)
   print('Moving to multiplayer button...')
   move_and_click(*(Coord.MULTIPLAYER_BUTTON.value))
-  connect_to_server(window)
+  # connect_to_server(window)
   
 def connect_to_server(window):
   while not gui.pixelMatchesColor(*(Coord.DIRECT_CONNECT_BUTTON.value), (56, 56, 56)):
@@ -80,8 +81,8 @@ def check_connection(window):
       move_and_click(*(Coord.TIMED_OUT_RETRY.value))
       return False
     else:
-      print('Shit aint workin')
-      time.sleep(3)
+      print('Trying to connect...')
+      time.sleep(4)
       gui.press('esc')
   return True
   
