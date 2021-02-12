@@ -29,6 +29,7 @@ classes/
 client_launcher/environment/accounts.txt
 client_launcher/environment/Lib/*
 client_launcher/environment/__pycache__
+client_launcher/environment/--assetIndex
 
 .mixin.out/
 .project
@@ -37,3 +38,4 @@ client_launcher/environment/__pycache__
 *.log
 *.log.gz
 chardetect.exe
+.classpath

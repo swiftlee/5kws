@@ -1,7 +1,8 @@
 import asyncio
-import aiofiles
+from aiofiles.threadpool import open as aioopen
 import aiohttp
 import subprocess
+import nest_asyncio
 
 base_url = 'https://authserver.mojang.com'
 login_dictionary = {}
@@ -45,39 +46,47 @@ async def init_game(username):
     load_complete = False
 
     for line in process.stdout:
-        print(line)
+        #TODO maybe find a different way to tell when minecraft loaded
         if line is not None and 'minecraft:textures/atlas/shulker_boxes' in str(line):
+            print('[!] Finished loading Minecraft!')
             return
 
 def boot_game_for_users():
   global login_dictionary
 
-  i = 0
-  for username in player_data:
-    if i < 2:
-      # booting the game should act synchronously; sign one user in at a time due to processing limitations
+  # booting the game should act synchronously; sign one user in at a time due to processing and RAM limitations
+  for i, username in enumerate(player_data, start=0):
+    if i < 1:
       loop.run_until_complete(init_game(username))
-      i+=1
 
+def fetch_users_and_boot_game():
+    # we can run this in parallel since it's not an intensive process
+    loop.run_until_complete(asyncio.gather(
+            *(get_user_access_token(*credentials) for credentials in login_dictionary.items())
+    ))
+
+    boot_game_for_users()
+
+async def main():
+    global login_dictionary
+
+    filename = 'accounts.txt'
+    
+    async with aioopen(filename, 'r') as file:
+        lines = await file.readlines()
+        it = iter([line.strip() for line in lines])
+        login_dictionary = dict(zip(it, it))
+    
+    fetch_users_and_boot_game()
+    
+    
 ######################### ENTRYPOINT ######################### 
 
-file = open('accounts.txt', 'r')
-
-while True:
-    username = file.readline().strip()
-    password = file.readline().strip()
-    if not username or not password or username in login_dictionary: break
-    login_dictionary[username] = password
-    
+# DRIVER CODE
 loop = asyncio.ProactorEventLoop()
+nest_asyncio.apply(loop)
 asyncio.set_event_loop(loop)
-
-# we can run this concurrently since it's not an intensive process
-loop.run_until_complete(asyncio.gather(
-        *(get_user_access_token(*credentials) for credentials in login_dictionary.items())
-))
-
-boot_game_for_users()
+loop.run_until_complete(main())
 
 #TODO: copy the required files (the jar and json file for the versions directory) to minecraft directory, also copy binaries to .minecraft/bin/1.16.5-Baritone/
 
