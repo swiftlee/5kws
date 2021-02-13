@@ -24,6 +24,7 @@ import baritone.api.command.ICommandSystem;
 import baritone.api.schematic.ISchematicSystem;
 import baritone.cache.WorldScanner;
 import baritone.command.CommandSystem;
+import baritone.command.DoubleMeshControl;
 import baritone.command.ExampleBaritoneControl;
 import baritone.utils.schematic.SchematicSystem;
 
@@ -45,6 +46,7 @@ public final class BaritoneProvider implements IBaritoneProvider {
 
         // Setup chat control, just for the primary instance
         new ExampleBaritoneControl(this.primary);
+        // new DoubleMeshControl(this.primary);
     }
 
     @Override
