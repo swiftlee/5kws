@@ -47,7 +47,7 @@ public class GotoCommand extends Command {
         if (args.peekDatatypeOrNull(RelativeCoordinate.INSTANCE) != null) {
             args.requireMax(3);
             BetterBlockPos origin = baritone.getPlayerContext().playerFeet();
-            Goal goal = args.getDatatypePost(RelativeGoal.INSTANCE, origin);
+            Goal goal = args.getDatatypePost(RelativeGoal.INSTANCE, origin); // ArgConsumer context, origin
             logDirect(String.format("Going to: %s", goal.toString()));
             baritone.getCustomGoalProcess().setGoalAndPath(goal);
             return;
@@ -59,7 +59,8 @@ public class GotoCommand extends Command {
 
     @Override
     public Stream<String> tabComplete(String label, IArgConsumer args) throws CommandException {
-        // since it's either a goal or a block, I don't think we can tab complete properly?
+        // since it's either a goal or a block, I don't think we can tab complete
+        // properly?
         // so just tab complete for the block variant
         return args.tabCompleteDatatype(BlockById.INSTANCE);
     }
@@ -71,16 +72,10 @@ public class GotoCommand extends Command {
 
     @Override
     public List<String> getLongDesc() {
-        return Arrays.asList(
-                "The goto command tells Baritone to head towards a given goal or block.",
-                "",
+        return Arrays.asList("The goto command tells Baritone to head towards a given goal or block.", "",
                 "Wherever a coordinate is expected, you can use ~ just like in regular Minecraft commands. Or, you can just use regular numbers.",
-                "",
-                "Usage:",
-                "> goto <block> - Go to a block, wherever it is in the world",
-                "> goto <y> - Go to a Y level",
-                "> goto <x> <z> - Go to an X,Z position",
-                "> goto <x> <y> <z> - Go to an X,Y,Z position"
-        );
+                "", "Usage:", "> goto <block> - Go to a block, wherever it is in the world",
+                "> goto <y> - Go to a Y level", "> goto <x> <z> - Go to an X,Z position",
+                "> goto <x> <y> <z> - Go to an X,Y,Z position");
     }
 }
