@@ -3,6 +3,7 @@ from aiofiles.threadpool import open as aioopen
 import aiohttp
 import subprocess
 import nest_asyncio
+import shutil
 
 base_url = 'https://authserver.mojang.com'
 login_dictionary = {}
@@ -61,8 +62,12 @@ def boot_game_for_users():
 
 def fetch_users_and_boot_game():
     # we can run this in parallel since it's not an intensive process
+    # loop.run_until_complete(asyncio.gather(
+    #         *(get_user_access_token(*credentials) for credentials in login_dictionary.items())
+    # ))
+
     loop.run_until_complete(asyncio.gather(
-            *(get_user_access_token(*credentials) for credentials in login_dictionary.items())
+            (get_user_access_token(*next(iter(login_dictionary.items())))) # TODO: uncomment above line and remove this when done dev testing
     ))
 
     boot_game_for_users()
@@ -83,6 +88,7 @@ async def main():
 ######################### ENTRYPOINT ######################### 
 
 # DRIVER CODE
+shutil.copy("G:\\Plugins\\5kws\\build\\libs\\baritone-api-1.6.3.jar", "C:\\Users\\jmc18\\AppData\\Roaming\\.minecraft\libraries\\5kws\\baritone-api\\1.6.3\\baritone-api-1.6.3.jar")
 loop = asyncio.ProactorEventLoop()
 nest_asyncio.apply(loop)
 asyncio.set_event_loop(loop)
