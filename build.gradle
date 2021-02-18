@@ -46,8 +46,9 @@ buildscript {
         classpath group: 'com.github.ImpactDevelopment', name: 'MixinGradle', version: '0.6.2'
         classpath group: 'net.fabricmc', name: 'fabric-loom', version: '0.5-SNAPSHOT'
     }
+    
 }
-
+apply plugin: 'java'
 
 import baritone.gradle.fabric.CreateVolderYarn
 import baritone.gradle.task.CreateDistTask
@@ -55,7 +56,6 @@ import baritone.gradle.task.ProguardTask
 import net.minecraftforge.gradle.userdev.tasks.RenameJarInPlace
 import org.apache.tools.ant.taskdefs.condition.Os
 
-apply plugin: 'java'
 
 def mcpVersion = [channel: 'snapshot', version: '20201028-1.16.3']
 
@@ -73,7 +73,6 @@ compileJava {
     sourceCompatibility = targetCompatibility = '1.8'
     options.encoding = "UTF-8" // allow emoji in comments :^)
 }
-
 
 sourceSets {
     api {
@@ -98,6 +97,10 @@ sourceSets {
     main {
         compileClasspath += schematica_api.output
     }
+
+    // ourShit {
+    //     compileClasspath += ourfukinclasspathm8
+    // }
 }
 
 task sourceJar(type: Jar, dependsOn: classes) {
@@ -206,7 +209,6 @@ dependencies {
             exclude module: 'log4j-core'
         }
     }
-
     testImplementation 'junit:junit:4.12'
 }
 
@@ -261,7 +263,6 @@ jar {
         attributes(
                 'MixinConfigs': 'mixins.baritone.json',
                 "MixinConnector": "baritone.launch.BaritoneMixinConnector",
-
                 'Implementation-Title': 'Baritone',
                 'Implementation-Version': version,
         )
@@ -335,4 +336,15 @@ if (getProject().hasProperty("baritone.fabric_build")) {
     task createDist(type: CreateDistTask, dependsOn: proguard)
 
 }
+/* 
+configurations {
+    provided
+    compile.extendsFrom provided
+}
+
+shadowJar {
+    configurations = [project.configurations.shadow] // ***
+    from sourceSets.api.allSource, sourceSets.launch.output, sourceSets.api.output
+} */
+
 build.finalizedBy(createDist)
