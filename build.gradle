@@ -42,6 +42,7 @@ buildscript {
     }
 
     dependencies {
+        classpath 'com.github.jengelman.gradle.plugins:shadow:4.0.4'
         classpath group: 'com.github.ImpactDevelopment', name: 'ForgeGradle', version: '3.0.115'
         classpath group: 'com.github.ImpactDevelopment', name: 'MixinGradle', version: '0.6.2'
         classpath group: 'net.fabricmc', name: 'fabric-loom', version: '0.5-SNAPSHOT'
@@ -49,6 +50,9 @@ buildscript {
     
 }
 apply plugin: 'java'
+apply plugin: 'com.github.johnrengelman.shadow'
+
+ext.mixinRefMap = new File(project.buildDir, "tmp/mixins/mixins.baritone.refmap.json")
 
 import baritone.gradle.fabric.CreateVolderYarn
 import baritone.gradle.task.CreateDistTask
@@ -88,6 +92,7 @@ sourceSets {
     launch {
         compileClasspath += main.compileClasspath + main.runtimeClasspath + main.output
         runtimeClasspath += main.compileClasspath + main.runtimeClasspath + main.output
+        ext.refMap = 'mixins.baritone.refmap.json'
     }
 
     schematica_api {
@@ -97,10 +102,6 @@ sourceSets {
     main {
         compileClasspath += schematica_api.output
     }
-
-    // ourShit {
-    //     compileClasspath += ourfukinclasspathm8
-    // }
 }
 
 task sourceJar(type: Jar, dependsOn: classes) {
@@ -209,6 +210,18 @@ dependencies {
             exclude module: 'log4j-core'
         }
     }
+    // runtime fileTree('lib') { include '*.jar' }
+    /* runtime fileTree(dir: "lib", include: "jedis-3.5.1.jar")
+    runtime files('./lib/jedis-3.5.1.jar')
+    compile fileTree(dir: "lib", include: "jedis-3.5.1.jar")
+    shadow fileTree(dir: "lib", include: "jedis-3.5.1.jar") */
+    
+    runtime 'redis.clients:jedis:3.5.1'
+    runtime launchCompile('redis.clients:jedis:3.5.1')
+    implementation 'redis.clients:jedis:3.5.1'
+    compile 'redis.clients:jedis:3.5.1'
+    shadow 'redis.clients:jedis:3.5.1'
+
     testImplementation 'junit:junit:4.12'
 }
 
@@ -237,6 +250,37 @@ if (getProject().hasProperty("baritone.fabric_build")) {
             it.options.release = targetVersion
         }
     }
+}
+
+shadowJar {
+    // TODO: NOT INCLUDING THE REFMAP? WHY THO
+    from sourceSets.launch.output, sourceSets.api.output, sourceSets.launch.refMap
+    from project.mixinRefMap
+
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
+    
+    println("$project.mixinRefMap")
+
+    // if (!getProject().hasProperty("baritone.forge_build")) {
+    //     exclude "**/BaritoneForgeModXD.class"
+    //     exclude "**/mods.toml"
+    // }
+
+
+    // if (getProject().hasProperty("baritone.fabric_build")) {
+    //     filesMatching("fabric.mod.json") {
+    //         expand "version": version
+    //     }
+    // } else {
+    //     exclude("fabric.mod.json")
+    // }
+
+    exclude("fabric.mod.json")
+    dependencies {
+        include(dependency('redis.clients:jedis:3.5.1'))
+    }
+    relocate "redis.clients", "baritone"
 }
 
 jar {
@@ -336,15 +380,6 @@ if (getProject().hasProperty("baritone.fabric_build")) {
     task createDist(type: CreateDistTask, dependsOn: proguard)
 
 }
-/* 
-configurations {
-    provided
-    compile.extendsFrom provided
-}
 
-shadowJar {
-    configurations = [project.configurations.shadow] // ***
-    from sourceSets.api.allSource, sourceSets.launch.output, sourceSets.api.output
-} */
-
+build.dependsOn(shadowJar)
 build.finalizedBy(createDist)
