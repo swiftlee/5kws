@@ -7,6 +7,8 @@ set GAME_DIR=%MC_DIR%
 
 set LIBRARIES_DIR=%MC_DIR%/libraries
 
+set LOCAL_LIBRARIES=../../lib
+
 set ASSETS_DIR=%MC_DIR%/assets
 set ASSET_INDEX=1.16
 
@@ -51,6 +53,7 @@ set LIBRARIES=%LIBRARIES_DIR%/net/minecraft/launchwrapper/1.12/launchwrapper-1.1
 %LIBRARIES_DIR%/org/lwjgl/lwjgl-stb/3.2.2/lwjgl-stb-3.2.2.jar;^
 %LIBRARIES_DIR%/org/lwjgl/lwjgl-tinyfd/3.2.2/lwjgl-tinyfd-3.2.2.jar;^
 %LIBRARIES_DIR%/com/mojang/text2speech/1.11.3/text2speech-1.11.3.jar;^
+%LOCAL_LIBRARIES%/jedis-3.5.1.jar;^
 %MC_DIR%/versions/1.16.5/1.16.5.jar
 
 set JVM_ARGS=-XX:HeapDumpPath=MojangTricksIntelDriversForPerformance_javaw.exe_minecraft.exe.heapdump "-Dos.name=Windows 10" -Dos.version=10.0 -Xss1M -Djava.library.path=%NATIVES_DIR% -Dminecraft.launcher.brand=minecraft-launcher -Dminecraft.launcher.version=2.2.1431 
