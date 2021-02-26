@@ -206,6 +206,8 @@ dependencies {
         }
     }
     
+    compile 'org.apache.commons:commons-pool2:2.6.2'
+    compile 'org.slf4j:slf4j-api:1.7.30'
     compile 'redis.clients:jedis:3.5.1'
 
     testImplementation 'junit:junit:4.12'
@@ -262,7 +264,7 @@ jar {
         attributes(
                 'MixinConfigs': 'mixins.baritone.json',
                 "MixinConnector": "baritone.launch.BaritoneMixinConnector",
-                'Class-Path': 'jedis-3.5.1.jar',
+                'Class-Path': 'jedis-3.5.1.jar commons-pool2.jar slf4j-api.jar',
                 'Implementation-Title': 'Baritone',
                 'Implementation-Version': version,
         )

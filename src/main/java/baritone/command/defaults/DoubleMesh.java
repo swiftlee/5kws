@@ -5,12 +5,16 @@ import baritone.api.command.Command;
 import baritone.api.command.argument.IArgConsumer;
 import baritone.api.command.datatypes.BlockById;
 import baritone.api.command.exception.CommandException;
-import redis.clients.jedis.Jedis;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
+import baritone.jedis.JedisAPI;
+import baritone.jedis.JedisProvider;
+import baritone.jedis.channel.Channel;
+
+//progfiles86 minecraft launcher runtime jrex64 bin logs
 public class DoubleMesh extends Command {
     protected DoubleMesh(IBaritone baritone) {
         super(baritone, "doublemesh");
@@ -18,10 +22,27 @@ public class DoubleMesh extends Command {
 
     @Override
     public void execute(String label, IArgConsumer args) throws CommandException {
-        Jedis jedis = new Jedis();
-        jedis.set("ping", "pong");
-        logDirect("ping: " + jedis.get("ping"));
-        jedis.close();
+        // arg can be one of two: MANUAL vs AUTOMATIC
+        // if MANUAL - allow master client to queue with friends
+        // if AUTOMATIC -- treat master client as bot party leader
+        JedisProvider provider = JedisAPI.getProvider();
+        if (args.hasExactlyOne()) {
+            String argStr = args.peekString();
+            if (argStr.equalsIgnoreCase("auto")) {
+                logDirect("Starting starting role assignment...");
+            } else if (argStr.equalsIgnoreCase("s")) {
+                logDirect("Subscribing to SEND_INVITATION channel...");
+                provider.subscribe(Channel.SEND_INVITATION);
+            } else if (argStr.equalsIgnoreCase("p")) {
+                logDirect("Publishing to channel...");
+                provider.publish(Channel.ROLE_ASSIGNMENT, "Initial published message");
+            }
+        } else {
+            logDirect("Closing jedis connection...");
+            provider.getJedis().close();
+        }
+        // jedis.set("ping", "pong");
+        // logDirect("ping: " + jedis.get("ping"));
         return;
     }
 

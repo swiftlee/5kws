@@ -24,7 +24,6 @@ import baritone.api.command.ICommandSystem;
 import baritone.api.schematic.ISchematicSystem;
 import baritone.cache.WorldScanner;
 import baritone.command.CommandSystem;
-import baritone.command.DoubleMeshControl;
 import baritone.command.ExampleBaritoneControl;
 import baritone.utils.schematic.SchematicSystem;
 

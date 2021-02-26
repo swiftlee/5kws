@@ -26,21 +26,18 @@ import baritone.api.utils.Helper;
 import baritone.api.utils.IPlayerContext;
 import baritone.api.utils.IPlayerController;
 import baritone.cache.CachedChunk;
+import baritone.jedis.JedisAPI;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.network.play.ClientPlayNetHandler;
 import net.minecraft.entity.Entity;
-import net.minecraft.inventory.container.ChestContainer;
 import net.minecraft.inventory.container.ClickType;
 import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.server.*;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
-
-import com.mojang.realmsclient.gui.RealmsServerSlotButton.Action;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -70,6 +67,8 @@ public class MixinClientPlayNetHandler implements Helper {
 
     @Inject(method = "handleJoinGame", at = @At("RETURN"))
     private void doPathOnClientJoinGame(SJoinGamePacket packetIn, CallbackInfo ci) {
+        JedisAPI.getProvider().initRoleAssignment();
+
         String prefix = "\u00A77\u00A7l[\u00A7e\u00A7l!\u00A77\u00A7l]\u00A7r ";
         logDirect("Bri'ish are ya? Ow'd ya know?");
         IBaritone baritone = BaritoneAPI.getProvider().getPrimaryBaritone();
