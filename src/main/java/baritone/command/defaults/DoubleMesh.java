@@ -3,16 +3,19 @@ package baritone.command.defaults;
 import baritone.api.IBaritone;
 import baritone.api.command.Command;
 import baritone.api.command.argument.IArgConsumer;
+import baritone.api.command.argument.ICommandArgument;
 import baritone.api.command.datatypes.BlockById;
 import baritone.api.command.exception.CommandException;
 
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Stream;
 
 import baritone.jedis.JedisAPI;
 import baritone.jedis.JedisProvider;
-import baritone.jedis.channel.Channel;
+import baritone.jedis.Party;
 
 //progfiles86 minecraft launcher runtime jrex64 bin logs
 public class DoubleMesh extends Command {
@@ -25,18 +28,34 @@ public class DoubleMesh extends Command {
         // arg can be one of two: MANUAL vs AUTOMATIC
         // if MANUAL - allow master client to queue with friends
         // if AUTOMATIC -- treat master client as bot party leader
+
         JedisProvider provider = JedisAPI.getProvider();
-        if (args.hasExactlyOne()) {
-            String argStr = args.peekString();
-            if (argStr.equalsIgnoreCase("auto")) {
-                logDirect("Starting starting role assignment...");
-            } else if (argStr.equalsIgnoreCase("s")) {
-                logDirect("Subscribing to SEND_INVITATION channel...");
-                provider.subscribe(Channel.SEND_INVITATION);
-            } else if (argStr.equalsIgnoreCase("p")) {
-                logDirect("Publishing to channel...");
-                provider.publish(Channel.ROLE_ASSIGNMENT, "Initial published message");
-            }
+        if (args.hasExactly(3)) {
+            String[] strArgs = args.getArgs().stream().map(ICommandArgument::getValue).toArray(String[]::new);
+            int partySize = Integer.valueOf(strArgs[1]);
+            if (strArgs[0].equalsIgnoreCase("auto")) {
+                // COMMENCE ROLE ASSIGNMENT!!!!!!!!!
+                // Message msg = new Message();
+                // String partyName = strArgs[2];
+                // logDirect(String.format("Starting starting role assignment, party size: %d,
+                // party name: %s", partySize,
+                // partyName));
+                // Collection<String> uuids = new HashSet<>();
+                // for (int i = 0; i < partySize; i++) {
+                // uuids.add("User#" + i);
+                // }
+                // Party party = new Party(partyName, uuids.stream().toArray(String[]::new));
+                // logDirect(String.format("Team members: %s",
+                // Arrays.toString(party.getAllMembers().stream().toArray(String[]::new))));
+
+            } /*
+               * else if (argStr.equalsIgnoreCase("s")) {
+               * logDirect("Subscribing to SEND_INVITATION channel...");
+               * provider.subscribe(Channel.SEND_INVITATION); } else if
+               * (argStr.equalsIgnoreCase("p")) { logDirect("Publishing to channel...");
+               * provider.publish(Channel.ROLE_ASSIGNMENT, "Initial published message");
+               */
+            // }
         } else {
             logDirect("Closing jedis connection...");
             provider.getJedis().close();
